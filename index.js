@@ -50,20 +50,21 @@ async function analyzeImage(imageBase64, prompt) {
 async function judgeResponses(response1, response2, response3) {
   try {
     const judgePrompt = `
-      Você é um juiz especialista em análise de imagens e sua função é extremamente crítica.
-      Você recebeu três descrições de uma mesma imagem, fornecidas por três avaliadores diferentes.
+      Você é um juiz de IA, especialista em consolidar múltiplas análises de imagens para produzir uma verdade fundamental. Sua função é crítica e exige máxima precisão.
+      Você recebeu análises de três avaliadores especializados com focos distintos:
 
-      Avaliador 1 disse: "${response1}"
-      Avaliador 2 disse: "${response2}"
-      Avaliador 3 disse: "${response3}"
+      - **Avaliador 1 (Factual):** "${response1}"
+      - **Avaliador 2 (Contextual):** "${response2}"
+      - **Avaliador 3 (Detalhista):** "${response3}"
 
-      Com base nessas três descrições, sua tarefa é:
-      1.  **Analisar a convergência:** Determine se as descrições são semelhantes ou consistentes o suficiente para chegar a um consenso claro sobre o que realmente está na imagem.
-      2.  **Decisão:**
-          *   Se houver um consenso claro e as respostas forem similares, forneça uma descrição final, única, concisa e precisa da imagem, destacando os pontos mais convincentes ou comuns.
-          *   Se as descrições forem muito divergentes, conflitantes ou insuficientes para formar um consenso confiável, declare claramente que "NÃO FOI POSSÍVEL CHEGAR A UM CONSENSO" e explique brevemente o motivo da divergência.
+      Sua tarefa é seguir este processo de julgamento rigoroso:
+      1.  **Análise e Síntese:** Identifique os pontos de consenso (elementos em que todos concordam), os pontos complementares (detalhes que se somam) e quaisquer contradições.
+      2.  **Construção do Veredito:** Com base na sua análise, construa uma descrição final única e abrangente. Incorpore o 'o quê' do Factual, o 'como' e 'porquê' do Contextual, e a riqueza do Detalhista.
+      3.  **Tomada de Decisão:**
+          *   Se as descrições forem consistentes, seu veredito DEVE ser a descrição final consolidada. Ela deve ser a melhor e mais completa descrição possível da imagem.
+          *   Apenas se houver uma contradição gritante e irreconciliável entre os avaliadores, declare "NÃO FOI POSSÍVEL CHEGAR A UM CONSENSO" e explique sucintamente o motivo do conflito.
 
-      Decisão final do Juiz (apenas a decisão ou a declaração de não consenso):
+      Seu veredito final (apenas a descrição ou a declaração de não consenso):
     `;
     const result = await model.generateContent(judgePrompt);
     const response = await result.response;
@@ -98,9 +99,9 @@ async function main() {
         const imageBase64 = imageBufferToBase64(imageBuffer);
 
         // Prompts avaliadores
-        const promptAV1 = "Descreva esta imagem em uma única frase.";
-        const promptAV2 = "Descreva esta imagem em uma única frase.";
-        const promptAV3 = "Descreva esta imagem em uma única frase.";
+        const promptAV1 = "Você é um analista de imagens especialista em descrever fatos. Sua tarefa é analisar a imagem e descrever objetivamente os elementos principais. Foque em responder 'o quê', 'quem' e 'onde'. Seja direto e literal. Descreva a imagem em uma única frase concisa.";
+        const promptAV2 = "Você é um especialista em interpretação de cenas. Sua tarefa é analisar a imagem para entender a ação, a interação entre os elementos e o contexto geral. Foque em responder 'o que está acontecendo' e 'qual é a atmosfera'. Descreva a imagem em uma única frase concisa.";
+        const promptAV3 = "Você é um observador de detalhes minucioso. Sua tarefa é focar nos detalhes específicos da imagem, como cores, texturas, objetos secundários e a composição visual. Descreva os detalhes mais importantes que você observa em uma única frase concisa.";
 
         // paralelo para mais eficiência
         const [resAV1, resAV2, resAV3] = await Promise.all([
